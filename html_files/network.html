@@ -1,0 +1,155 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 450px;
+                 background-color: #0E1117;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#1F77B4", "font": {"color": "white"}, "id": "Man City_GK", "label": "GK", "shape": "dot", "size": 15, "title": "Player: Man City_GK\\nReceived: 91\\nPassed: 325"}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Man City_CB1", "label": "CB1", "shape": "dot", "size": 15, "title": "Player: Man City_CB1\\nReceived: 477\\nPassed: 805"}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Man City_CB2", "label": "CB2", "shape": "dot", "size": 15, "title": "Player: Man City_CB2\\nReceived: 551\\nPassed: 758"}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Man City_LB", "label": "LB", "shape": "dot", "size": 15, "title": "Player: Man City_LB\\nReceived: 484\\nPassed: 613"}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Man City_RB", "label": "RB", "shape": "dot", "size": 15, "title": "Player: Man City_RB\\nReceived: 518\\nPassed: 524"}, {"color": "#FF4B4B", "font": {"color": "white"}, "id": "Man City_ST", "label": "ST", "shape": "dot", "size": 25, "title": "Player: Man City_ST\\nReceived: 705\\nPassed: 147"}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Man City_DM", "label": "DM", "shape": "dot", "size": 15, "title": "Player: Man City_DM\\nReceived: 993\\nPassed: 1025"}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Man City_CM", "label": "CM", "shape": "dot", "size": 15, "title": "Player: Man City_CM\\nReceived: 1121\\nPassed: 838"}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Man City_LW", "label": "LW", "shape": "dot", "size": 15, "title": "Player: Man City_LW\\nReceived: 518\\nPassed: 360"}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Man City_RW", "label": "RW", "shape": "dot", "size": 15, "title": "Player: Man City_RW\\nReceived: 513\\nPassed: 372"}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Man City_AM", "label": "AM", "shape": "dot", "size": 15, "title": "Player: Man City_AM\\nReceived: 496\\nPassed: 700"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": "#4b5563", "from": "Man City_GK", "title": "93 passes", "to": "Man City_CB1", "value": 93}, {"arrows": "to", "color": "#4b5563", "from": "Man City_GK", "title": "108 passes", "to": "Man City_CB2", "value": 108}, {"arrows": "to", "color": "#4b5563", "from": "Man City_GK", "title": "57 passes", "to": "Man City_LB", "value": 57}, {"arrows": "to", "color": "#4b5563", "from": "Man City_GK", "title": "51 passes", "to": "Man City_RB", "value": 51}, {"arrows": "to", "color": "#4b5563", "from": "Man City_GK", "title": "16 passes", "to": "Man City_ST", "value": 16}, {"arrows": "to", "color": "#4b5563", "from": "Man City_CB1", "title": "286 passes", "to": "Man City_CB2", "value": 286}, {"arrows": "to", "color": "#4b5563", "from": "Man City_CB1", "title": "167 passes", "to": "Man City_LB", "value": 167}, {"arrows": "to", "color": "#4b5563", "from": "Man City_CB1", "title": "214 passes", "to": "Man City_DM", "value": 214}, {"arrows": "to", "color": "#4b5563", "from": "Man City_CB1", "title": "55 passes", "to": "Man City_GK", "value": 55}, {"arrows": "to", "color": "#4b5563", "from": "Man City_CB1", "title": "83 passes", "to": "Man City_CM", "value": 83}, {"arrows": "to", "color": "#4b5563", "from": "Man City_CB2", "title": "219 passes", "to": "Man City_CB1", "value": 219}, {"arrows": "to", "color": "#4b5563", "from": "Man City_CB2", "title": "174 passes", "to": "Man City_RB", "value": 174}, {"arrows": "to", "color": "#4b5563", "from": "Man City_CB2", "title": "249 passes", "to": "Man City_DM", "value": 249}, {"arrows": "to", "color": "#4b5563", "from": "Man City_CB2", "title": "36 passes", "to": "Man City_GK", "value": 36}, {"arrows": "to", "color": "#4b5563", "from": "Man City_CB2", "title": "80 passes", "to": "Man City_CM", "value": 80}, {"arrows": "to", "color": "#4b5563", "from": "Man City_LB", "title": "165 passes", "to": "Man City_CB1", "value": 165}, {"arrows": "to", "color": "#4b5563", "from": "Man City_LB", "title": "140 passes", "to": "Man City_LW", "value": 140}, {"arrows": "to", "color": "#4b5563", "from": "Man City_LB", "title": "104 passes", "to": "Man City_DM", "value": 104}, {"arrows": "to", "color": "#4b5563", "from": "Man City_LB", "title": "204 passes", "to": "Man City_CM", "value": 204}, {"arrows": "to", "color": "#4b5563", "from": "Man City_RB", "title": "157 passes", "to": "Man City_CB2", "value": 157}, {"arrows": "to", "color": "#4b5563", "from": "Man City_RB", "title": "116 passes", "to": "Man City_RW", "value": 116}, {"arrows": "to", "color": "#4b5563", "from": "Man City_RB", "title": "114 passes", "to": "Man City_DM", "value": 114}, {"arrows": "to", "color": "#4b5563", "from": "Man City_RB", "title": "137 passes", "to": "Man City_CM", "value": 137}, {"arrows": "to", "color": "#4b5563", "from": "Man City_ST", "title": "47 passes", "to": "Man City_AM", "value": 47}, {"arrows": "to", "color": "#4b5563", "from": "Man City_ST", "title": "37 passes", "to": "Man City_LW", "value": 37}, {"arrows": "to", "color": "#4b5563", "from": "Man City_ST", "title": "63 passes", "to": "Man City_RW", "value": 63}, {"arrows": "to", "color": "#4b5563", "from": "Man City_DM", "title": "449 passes", "to": "Man City_CM", "value": 449}, {"arrows": "to", "color": "#4b5563", "from": "Man City_DM", "title": "135 passes", "to": "Man City_AM", "value": 135}, {"arrows": "to", "color": "#4b5563", "from": "Man City_DM", "title": "152 passes", "to": "Man City_LB", "value": 152}, {"arrows": "to", "color": "#4b5563", "from": "Man City_DM", "title": "189 passes", "to": "Man City_RB", "value": 189}, {"arrows": "to", "color": "#4b5563", "from": "Man City_DM", "title": "55 passes", "to": "Man City_LW", "value": 55}, {"arrows": "to", "color": "#4b5563", "from": "Man City_DM", "title": "45 passes", "to": "Man City_RW", "value": 45}, {"arrows": "to", "color": "#4b5563", "from": "Man City_CM", "title": "164 passes", "to": "Man City_AM", "value": 164}, {"arrows": "to", "color": "#4b5563", "from": "Man City_CM", "title": "131 passes", "to": "Man City_LW", "value": 131}, {"arrows": "to", "color": "#4b5563", "from": "Man City_CM", "title": "111 passes", "to": "Man City_RW", "value": 111}, {"arrows": "to", "color": "#4b5563", "from": "Man City_CM", "title": "312 passes", "to": "Man City_DM", "value": 312}, {"arrows": "to", "color": "#4b5563", "from": "Man City_CM", "title": "120 passes", "to": "Man City_ST", "value": 120}, {"arrows": "to", "color": "#4b5563", "from": "Man City_LW", "title": "140 passes", "to": "Man City_ST", "value": 140}, {"arrows": "to", "color": "#4b5563", "from": "Man City_LW", "title": "72 passes", "to": "Man City_AM", "value": 72}, {"arrows": "to", "color": "#4b5563", "from": "Man City_LW", "title": "40 passes", "to": "Man City_CM", "value": 40}, {"arrows": "to", "color": "#4b5563", "from": "Man City_LW", "title": "108 passes", "to": "Man City_LB", "value": 108}, {"arrows": "to", "color": "#4b5563", "from": "Man City_RW", "title": "152 passes", "to": "Man City_ST", "value": 152}, {"arrows": "to", "color": "#4b5563", "from": "Man City_RW", "title": "78 passes", "to": "Man City_AM", "value": 78}, {"arrows": "to", "color": "#4b5563", "from": "Man City_RW", "title": "38 passes", "to": "Man City_CM", "value": 38}, {"arrows": "to", "color": "#4b5563", "from": "Man City_RW", "title": "104 passes", "to": "Man City_RB", "value": 104}, {"arrows": "to", "color": "#4b5563", "from": "Man City_AM", "title": "277 passes", "to": "Man City_ST", "value": 277}, {"arrows": "to", "color": "#4b5563", "from": "Man City_AM", "title": "155 passes", "to": "Man City_LW", "value": 155}, {"arrows": "to", "color": "#4b5563", "from": "Man City_AM", "title": "178 passes", "to": "Man City_RW", "value": 178}, {"arrows": "to", "color": "#4b5563", "from": "Man City_AM", "title": "90 passes", "to": "Man City_CM", "value": 90}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>
