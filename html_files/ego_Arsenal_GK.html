@@ -34,7 +34,7 @@
              #mynetwork {
                  width: 100%;
                  height: 260px;
-                 background-color: #0E1117;
+                 background-color: #004684;
                  border: 1px solid lightgray;
                  position: relative;
                  float: left;
@@ -88,8 +88,8 @@
                   
 
                   // parsing and collecting nodes and edges from the python
-                  nodes = new vis.DataSet([{"color": "#FF4B4B", "font": {"color": "white"}, "id": "Arsenal_GK", "label": "GK", "shape": "dot", "size": 25}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Arsenal_CB1", "label": "CB1", "shape": "dot", "size": 15}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Arsenal_CB2", "label": "CB2", "shape": "dot", "size": 15}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Arsenal_LB", "label": "LB", "shape": "dot", "size": 15}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Arsenal_RB", "label": "RB", "shape": "dot", "size": 15}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Arsenal_ST", "label": "ST", "shape": "dot", "size": 15}]);
-                  edges = new vis.DataSet([{"arrows": "to", "color": "#4b5563", "from": "Arsenal_GK", "to": "Arsenal_CB1", "value": 123}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_GK", "to": "Arsenal_CB2", "value": 107}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_GK", "to": "Arsenal_LB", "value": 40}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_GK", "to": "Arsenal_RB", "value": 63}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_GK", "to": "Arsenal_ST", "value": 16}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_CB1", "to": "Arsenal_CB2", "value": 198}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_CB1", "to": "Arsenal_LB", "value": 147}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_CB1", "to": "Arsenal_GK", "value": 50}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_CB2", "to": "Arsenal_CB1", "value": 236}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_CB2", "to": "Arsenal_RB", "value": 174}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_CB2", "to": "Arsenal_GK", "value": 49}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_LB", "to": "Arsenal_CB1", "value": 210}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_RB", "to": "Arsenal_CB2", "value": 207}]);
+                  nodes = new vis.DataSet([{"color": "#FFED00", "font": {"color": "white"}, "id": "Arsenal_GK", "label": "GK", "shape": "dot", "size": 25, "x": -400, "y": 0}, {"color": "#FFFFFF", "font": {"color": "white"}, "id": "Arsenal_CB1", "label": "CB1", "shape": "dot", "size": 15, "x": -250, "y": -100}, {"color": "#FFFFFF", "font": {"color": "white"}, "id": "Arsenal_CB2", "label": "CB2", "shape": "dot", "size": 15, "x": -250, "y": 100}, {"color": "#FFFFFF", "font": {"color": "white"}, "id": "Arsenal_LB", "label": "LB", "shape": "dot", "size": 15, "x": -150, "y": -250}, {"color": "#FFFFFF", "font": {"color": "white"}, "id": "Arsenal_RB", "label": "RB", "shape": "dot", "size": 15, "x": -150, "y": 250}, {"color": "#FFFFFF", "font": {"color": "white"}, "id": "Arsenal_ST", "label": "ST", "shape": "dot", "size": 15, "x": 350, "y": 0}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": "#4b5563", "from": "Arsenal_GK", "to": "Arsenal_CB1", "value": 0.608025546462444}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_GK", "to": "Arsenal_CB2", "value": 0.8122047948268756}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_GK", "to": "Arsenal_LB", "value": 0.3724966692217094}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_GK", "to": "Arsenal_RB", "value": 0.6668751703347124}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_GK", "to": "Arsenal_ST", "value": 0.6150579434035465}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_CB1", "to": "Arsenal_CB2", "value": 2.2176670127922105}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_CB1", "to": "Arsenal_LB", "value": 1.3746990102232064}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_CB1", "to": "Arsenal_GK", "value": 0.4434565723264493}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_CB2", "to": "Arsenal_CB1", "value": 2.3267980918535374}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_CB2", "to": "Arsenal_RB", "value": 1.7540133933797795}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_CB2", "to": "Arsenal_GK", "value": 0.756616214926615}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_LB", "to": "Arsenal_CB1", "value": 1.6044182504406697}, {"arrows": "to", "color": "#4b5563", "from": "Arsenal_RB", "to": "Arsenal_CB2", "value": 1.7651996627883364}]);
 
                   nodeColors = {};
                   allNodes = nodes.get({ returnType: "Object" });
@@ -119,7 +119,7 @@
         "hideNodesOnDrag": false
     },
     "physics": {
-        "enabled": true,
+        "enabled": false,
         "stabilization": {
             "enabled": true,
             "fit": true,

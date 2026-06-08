@@ -88,8 +88,8 @@
                   
 
                   // parsing and collecting nodes and edges from the python
-                  nodes = new vis.DataSet([{"color": "#1F77B4", "font": {"color": "white"}, "id": "Man City_LW", "label": "LW", "shape": "dot", "size": 15}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Man City_AM", "label": "AM", "shape": "dot", "size": 15}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Man City_RW", "label": "RW", "shape": "dot", "size": 15}, {"color": "#FF4B4B", "font": {"color": "white"}, "id": "Man City_ST", "label": "ST", "shape": "dot", "size": 25}]);
-                  edges = new vis.DataSet([{"arrows": "to", "color": "#4b5563", "from": "Man City_LW", "to": "Man City_ST", "value": 140}, {"arrows": "to", "color": "#4b5563", "from": "Man City_LW", "to": "Man City_AM", "value": 72}, {"arrows": "to", "color": "#4b5563", "from": "Man City_AM", "to": "Man City_ST", "value": 277}, {"arrows": "to", "color": "#4b5563", "from": "Man City_AM", "to": "Man City_LW", "value": 155}, {"arrows": "to", "color": "#4b5563", "from": "Man City_AM", "to": "Man City_RW", "value": 178}, {"arrows": "to", "color": "#4b5563", "from": "Man City_RW", "to": "Man City_ST", "value": 152}, {"arrows": "to", "color": "#4b5563", "from": "Man City_RW", "to": "Man City_AM", "value": 78}, {"arrows": "to", "color": "#4b5563", "from": "Man City_ST", "to": "Man City_AM", "value": 47}, {"arrows": "to", "color": "#4b5563", "from": "Man City_ST", "to": "Man City_LW", "value": 37}, {"arrows": "to", "color": "#4b5563", "from": "Man City_ST", "to": "Man City_RW", "value": 63}]);
+                  nodes = new vis.DataSet([{"color": "#1F77B4", "font": {"color": "white"}, "id": "Man City_LW", "label": "LW", "shape": "dot", "size": 15, "x": 250, "y": -200}, {"color": "#FF4B4B", "font": {"color": "white"}, "id": "Man City_ST", "label": "ST", "shape": "dot", "size": 25, "x": 350, "y": 0}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Man City_RW", "label": "RW", "shape": "dot", "size": 15, "x": 250, "y": 200}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Man City_AM", "label": "AM", "shape": "dot", "size": 15, "x": 150, "y": 0}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": "#4b5563", "from": "Man City_LW", "to": "Man City_ST", "value": 1.6727098603440802}, {"arrows": "to", "color": "#4b5563", "from": "Man City_LW", "to": "Man City_AM", "value": 1.0127533718029986}, {"arrows": "to", "color": "#4b5563", "from": "Man City_ST", "to": "Man City_AM", "value": 0.3544945619883146}, {"arrows": "to", "color": "#4b5563", "from": "Man City_ST", "to": "Man City_LW", "value": 0.4410881553158112}, {"arrows": "to", "color": "#4b5563", "from": "Man City_ST", "to": "Man City_RW", "value": 0.6803794601908881}, {"arrows": "to", "color": "#4b5563", "from": "Man City_RW", "to": "Man City_ST", "value": 1.1943565660096014}, {"arrows": "to", "color": "#4b5563", "from": "Man City_RW", "to": "Man City_AM", "value": 1.0941173826849742}, {"arrows": "to", "color": "#4b5563", "from": "Man City_AM", "to": "Man City_ST", "value": 11.088569474654296}, {"arrows": "to", "color": "#4b5563", "from": "Man City_AM", "to": "Man City_LW", "value": 6.369199919950041}, {"arrows": "to", "color": "#4b5563", "from": "Man City_AM", "to": "Man City_RW", "value": 6.106073681834074}]);
 
                   nodeColors = {};
                   allNodes = nodes.get({ returnType: "Object" });
@@ -119,7 +119,7 @@
         "hideNodesOnDrag": false
     },
     "physics": {
-        "enabled": true,
+        "enabled": false,
         "stabilization": {
             "enabled": true,
             "fit": true,

@@ -34,7 +34,7 @@
              #mynetwork {
                  width: 100%;
                  height: 260px;
-                 background-color: #004684;
+                 background-color: #0E1117;
                  border: 1px solid lightgray;
                  position: relative;
                  float: left;
@@ -88,8 +88,8 @@
                   
 
                   // parsing and collecting nodes and edges from the python
-                  nodes = new vis.DataSet([{"color": "#FFED00", "font": {"color": "white"}, "id": "Liverpool_GK", "label": "GK", "shape": "dot", "size": 25, "x": -400, "y": 0}, {"color": "#FFFFFF", "font": {"color": "white"}, "id": "Liverpool_CB1", "label": "CB1", "shape": "dot", "size": 15, "x": -250, "y": -100}, {"color": "#FFFFFF", "font": {"color": "white"}, "id": "Liverpool_CB2", "label": "CB2", "shape": "dot", "size": 15, "x": -250, "y": 100}, {"color": "#FFFFFF", "font": {"color": "white"}, "id": "Liverpool_LB", "label": "LB", "shape": "dot", "size": 15, "x": -150, "y": -250}, {"color": "#FFFFFF", "font": {"color": "white"}, "id": "Liverpool_RB", "label": "RB", "shape": "dot", "size": 15, "x": -150, "y": 250}, {"color": "#FFFFFF", "font": {"color": "white"}, "id": "Liverpool_ST", "label": "ST", "shape": "dot", "size": 15, "x": 350, "y": 0}]);
-                  edges = new vis.DataSet([{"arrows": "to", "color": "#4b5563", "from": "Liverpool_GK", "to": "Liverpool_CB1", "value": 1.0079569669597341}, {"arrows": "to", "color": "#4b5563", "from": "Liverpool_GK", "to": "Liverpool_CB2", "value": 0.9158499693400858}, {"arrows": "to", "color": "#4b5563", "from": "Liverpool_GK", "to": "Liverpool_LB", "value": 0.632179772302571}, {"arrows": "to", "color": "#4b5563", "from": "Liverpool_GK", "to": "Liverpool_RB", "value": 0.37658435984664285}, {"arrows": "to", "color": "#4b5563", "from": "Liverpool_GK", "to": "Liverpool_ST", "value": 0.7143843674196727}, {"arrows": "to", "color": "#4b5563", "from": "Liverpool_CB1", "to": "Liverpool_CB2", "value": 1.0909527217076591}, {"arrows": "to", "color": "#4b5563", "from": "Liverpool_CB1", "to": "Liverpool_LB", "value": 0.7896997140698682}, {"arrows": "to", "color": "#4b5563", "from": "Liverpool_CB1", "to": "Liverpool_GK", "value": 0.41946693169529853}, {"arrows": "to", "color": "#4b5563", "from": "Liverpool_CB2", "to": "Liverpool_CB1", "value": 1.7524102683111464}, {"arrows": "to", "color": "#4b5563", "from": "Liverpool_CB2", "to": "Liverpool_RB", "value": 0.9967476590492351}, {"arrows": "to", "color": "#4b5563", "from": "Liverpool_CB2", "to": "Liverpool_GK", "value": 0.3440385419101572}, {"arrows": "to", "color": "#4b5563", "from": "Liverpool_LB", "to": "Liverpool_CB1", "value": 0.7894389508447589}, {"arrows": "to", "color": "#4b5563", "from": "Liverpool_RB", "to": "Liverpool_CB2", "value": 1.2411689249370732}]);
+                  nodes = new vis.DataSet([{"color": "#FF4B4B", "font": {"color": "white"}, "id": "Aston Villa_GK", "label": "GK", "shape": "dot", "size": 25}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Aston Villa_CB1", "label": "CB1", "shape": "dot", "size": 15}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Aston Villa_CB2", "label": "CB2", "shape": "dot", "size": 15}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Aston Villa_LB", "label": "LB", "shape": "dot", "size": 15}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Aston Villa_RB", "label": "RB", "shape": "dot", "size": 15}, {"color": "#1F77B4", "font": {"color": "white"}, "id": "Aston Villa_ST", "label": "ST", "shape": "dot", "size": 15}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": "#4b5563", "from": "Aston Villa_GK", "to": "Aston Villa_CB1", "value": 77}, {"arrows": "to", "color": "#4b5563", "from": "Aston Villa_GK", "to": "Aston Villa_CB2", "value": 93}, {"arrows": "to", "color": "#4b5563", "from": "Aston Villa_GK", "to": "Aston Villa_LB", "value": 58}, {"arrows": "to", "color": "#4b5563", "from": "Aston Villa_GK", "to": "Aston Villa_RB", "value": 47}, {"arrows": "to", "color": "#4b5563", "from": "Aston Villa_GK", "to": "Aston Villa_ST", "value": 16}, {"arrows": "to", "color": "#4b5563", "from": "Aston Villa_CB1", "to": "Aston Villa_CB2", "value": 156}, {"arrows": "to", "color": "#4b5563", "from": "Aston Villa_CB1", "to": "Aston Villa_LB", "value": 108}, {"arrows": "to", "color": "#4b5563", "from": "Aston Villa_CB1", "to": "Aston Villa_GK", "value": 37}, {"arrows": "to", "color": "#4b5563", "from": "Aston Villa_CB2", "to": "Aston Villa_CB1", "value": 117}, {"arrows": "to", "color": "#4b5563", "from": "Aston Villa_CB2", "to": "Aston Villa_RB", "value": 125}, {"arrows": "to", "color": "#4b5563", "from": "Aston Villa_CB2", "to": "Aston Villa_GK", "value": 52}, {"arrows": "to", "color": "#4b5563", "from": "Aston Villa_LB", "to": "Aston Villa_CB1", "value": 94}, {"arrows": "to", "color": "#4b5563", "from": "Aston Villa_RB", "to": "Aston Villa_CB2", "value": 113}]);
 
                   nodeColors = {};
                   allNodes = nodes.get({ returnType: "Object" });
@@ -119,7 +119,7 @@
         "hideNodesOnDrag": false
     },
     "physics": {
-        "enabled": false,
+        "enabled": true,
         "stabilization": {
             "enabled": true,
             "fit": true,
