@@ -39,6 +39,42 @@ if not RESULTS.exists():
 
 res = json.loads(RESULTS.read_text())
 
+# --------------------------------------------- 0. algorithm comparison ---
+st.markdown('<p class="section-label">Algorithm comparison at a glance</p>',
+            unsafe_allow_html=True)
+
+import pandas as pd
+
+ir_all = res["identity_retrieval"]
+rc_all = res["role_coherence"]
+summary_rows = []
+for cfg in ir_all:
+    if cfg.startswith("_"):
+        continue
+    o = ir_all[cfg]["overall"]
+    rc = rc_all.get(cfg, {})
+    summary_rows.append({
+        "Algorithm / features": cfg,
+        "Identity top-1": f"{o['top1']*100:.1f}%",
+        "Identity top-5": f"{o['top5']*100:.1f}%",
+        "MRR": f"{o['mrr']:.3f}",
+        "Median rank": o["median_rank"],
+        "Role coherence": f"{rc.get('coherence', 0)*100:.1f}%",
+        "Role lift": f"×{rc.get('lift', 0)}",
+    })
+st.dataframe(pd.DataFrame(summary_rows), use_container_width=True, hide_index=True)
+st.caption(
+    "Higher is better everywhere except median rank. Random top-1 ≈ "
+    f"{res['identity_retrieval']['_random_baseline']['top1']*100:.2f}% "
+    "(position pools of ~140–460 players). Key comparison: **GraphWave beats "
+    "Node2Vec on every metric** because its structural signatures are comparable "
+    "across team graphs, while independently trained Node2Vec spaces are not. "
+    "Tabular stats remain the strongest *identity* signal — structure encodes "
+    "*role*, and the two are complementary."
+)
+
+st.divider()
+
 # ------------------------------------------------- 1. identity retrieval ---
 st.markdown('<p class="section-label">1 · Identity retrieval (split-half reliability)</p>',
             unsafe_allow_html=True)

@@ -170,6 +170,8 @@ COORDS = dict(zip(features_df["player_name"],
 with st.sidebar:
     st.markdown('<p class="section-label">🔮 ScoutGraph</p>', unsafe_allow_html=True)
     st.caption("Wyscout event data · Big-5 European leagues · 2017/18 season")
+    st.page_link("pages/1_📊_Validation.py",
+                 label="Algorithm comparison & validation results", icon="📊")
     st.markdown('<p class="section-label">Scouting target</p>', unsafe_allow_html=True)
 
     eligible = features_df[features_df["eligible"]]
@@ -254,8 +256,9 @@ inspect_name = st.selectbox("🔍 Inspect a match in detail",
                             results["player_name"].tolist())
 match = results[results["player_name"] == inspect_name].iloc[0]
 
-tab_radar, tab_break, tab_net, tab_stats = st.tabs(
-    ["◈ Radar profile", "◈ Why similar?", "◈ Network view", "◈ Full stats"])
+tab_radar, tab_break, tab_algo, tab_net, tab_stats = st.tabs(
+    ["◈ Radar profile", "◈ Why similar?", "◈ Algorithms", "◈ Network view",
+     "◈ Full stats"])
 
 with tab_radar:
     c1, c2 = st.columns([1.4, 1])
@@ -289,6 +292,67 @@ with tab_break:
             f"(near-identical profiles there), while the biggest stylistic gap is in "
             f"**{weakest}**. Archetypes: **{match['archetype']}** vs "
             f"**{target['archetype']}**.")
+
+with tab_algo:
+    st.markdown('<p class="section-label">Same player, different algorithms</p>',
+                unsafe_allow_html=True)
+    st.caption(
+        f"Top {top_n} replacements for **{target_name}** according to each "
+        "algorithm, all searched in the same positional pool and leagues. "
+        "Players also found by *your current selection* are marked ★. "
+        "Full quantitative benchmarks are on the **📊 Validation** page.")
+
+    if target["position"] == "Goalkeeper":
+        tabular_groups = ["Goalkeeping", "Physique"]
+    else:
+        tabular_groups = ["Attacking", "Creation & Passing", "Defending", "Physique"]
+
+    ALGO_CONFIGS = {
+        "Tabular stats": tabular_groups,
+        "Graph topology": ["Passing Network", "Defensive Synergy"],
+        "Node2Vec": ["Style Embeddings (Node2Vec)"],
+        "GraphWave": ["Structural Embeddings (GraphWave)"],
+        "Your selection": None,  # scout's current groups + weights
+    }
+
+    current_set = set(results["player_name"])
+    algo_cols = st.columns(len(ALGO_CONFIGS))
+    for col, (algo, groups) in zip(algo_cols, ALGO_CONFIGS.items()):
+        if groups is None:
+            algo_results = results
+        else:
+            algo_results, _ = find_similar_players(
+                target_name, features_df, groups, None, metric, top_n,
+                leagues=leagues)
+        with col:
+            st.markdown(f'<p class="section-label">{algo}</p>',
+                        unsafe_allow_html=True)
+            lines = []
+            for i, (_, r) in enumerate(algo_results.iterrows()):
+                star = " ★" if (groups is not None and r["player_name"] in current_set) else ""
+                sim = max(0.0, r["similarity"]) * 100
+                lines.append(
+                    f'<div style="margin-bottom:0.55rem;">'
+                    f'<span style="color:#4c3a70;font-weight:700;">#{i+1}</span> '
+                    f'<b>{r["player_name"]}</b>{star}<br>'
+                    f'<span class="card-meta">{r["team_name"]} · '
+                    f'<span style="color:#d946ef;font-weight:600;">{sim:.0f}%</span>'
+                    f'</span></div>')
+            st.markdown("".join(lines), unsafe_allow_html=True)
+
+    n2v_overlap = len(set(find_similar_players(
+        target_name, features_df, ["Style Embeddings (Node2Vec)"], None,
+        metric, top_n, leagues=leagues)[0]["player_name"]) & current_set)
+    gw_overlap = len(set(find_similar_players(
+        target_name, features_df, ["Structural Embeddings (GraphWave)"], None,
+        metric, top_n, leagues=leagues)[0]["player_name"]) & current_set)
+    st.info(
+        f"**How to read this:** Node2Vec embeddings are trained per team, so its "
+        f"cross-team rankings are essentially arbitrary (benchmark: 1.9% identity "
+        f"retrieval, role coherence below random). GraphWave signatures are "
+        f"comparable across teams and rank by *structural role*. Agreement with "
+        f"your current selection here: GraphWave {gw_overlap}/{top_n}, "
+        f"Node2Vec {n2v_overlap}/{top_n}.")
 
 with tab_net:
     layer = st.radio("Network layer",

@@ -81,39 +81,78 @@
     "Node2Vec (unaligned)": {
       "overall": {
         "n": 1235,
-        "top1": 0.006,
-        "top5": 0.024,
-        "mrr": 0.028,
-        "median_rank": 130
+        "top1": 0.003,
+        "top5": 0.019,
+        "mrr": 0.025,
+        "median_rank": 135
+      },
+      "per_position": {
+        "Goalkeeper": {
+          "n": 97,
+          "top1": 0.0,
+          "top5": 0.062,
+          "mrr": 0.058,
+          "median_rank": 36
+        },
+        "Defender": {
+          "n": 471,
+          "top1": 0.004,
+          "top5": 0.011,
+          "mrr": 0.02,
+          "median_rank": 176
+        },
+        "Midfielder": {
+          "n": 443,
+          "top1": 0.002,
+          "top5": 0.011,
+          "mrr": 0.017,
+          "median_rank": 180
+        },
+        "Forward": {
+          "n": 224,
+          "top1": 0.004,
+          "top5": 0.036,
+          "mrr": 0.034,
+          "median_rank": 87
+        }
+      }
+    },
+    "GraphWave (structural)": {
+      "overall": {
+        "n": 1235,
+        "top1": 0.01,
+        "top5": 0.04,
+        "mrr": 0.037,
+        "median_rank": 119
       },
       "per_position": {
         "Goalkeeper": {
           "n": 97,
           "top1": 0.021,
-          "top5": 0.103,
-          "mrr": 0.08,
-          "median_rank": 31
+          "top5": 0.052,
+          "mrr": 0.062,
+          "median_rank": 46
         },
         "Defender": {
           "n": 471,
           "top1": 0.006,
-          "top5": 0.017,
-          "mrr": 0.022,
-          "median_rank": 164
+          "top5": 0.023,
+          "mrr": 0.026,
+          "median_rank": 176
         },
         "Midfielder": {
           "n": 443,
-          "top1": 0.005,
-          "top5": 0.009,
-          "mrr": 0.02,
-          "median_rank": 170
+          "top1": 0.014,
+          "top5": 0.052,
+          "mrr": 0.043,
+          "median_rank": 144
         },
         "Forward": {
           "n": 224,
-          "top1": 0.0,
-          "top5": 0.036,
-          "mrr": 0.035,
-          "median_rank": 78
+          "top1": 0.004,
+          "top5": 0.045,
+          "mrr": 0.038,
+          "median_rank": 75
         }
       }
     },
@@ -156,6 +195,45 @@
         }
       }
     },
+    "Hybrid + GraphWave": {
+      "overall": {
+        "n": 1235,
+        "top1": 0.066,
+        "top5": 0.168,
+        "mrr": 0.127,
+        "median_rank": 50
+      },
+      "per_position": {
+        "Goalkeeper": {
+          "n": 97,
+          "top1": 0.01,
+          "top5": 0.124,
+          "mrr": 0.089,
+          "median_rank": 23
+        },
+        "Defender": {
+          "n": 471,
+          "top1": 0.051,
+          "top5": 0.134,
+          "mrr": 0.102,
+          "median_rank": 77
+        },
+        "Midfielder": {
+          "n": 443,
+          "top1": 0.072,
+          "top5": 0.176,
+          "mrr": 0.133,
+          "median_rank": 51
+        },
+        "Forward": {
+          "n": 224,
+          "top1": 0.112,
+          "top5": 0.246,
+          "mrr": 0.186,
+          "median_rank": 30
+        }
+      }
+    },
     "_random_baseline": {
       "top1": 0.0048,
       "top5": 0.0239,
@@ -189,15 +267,27 @@
       "n": 1681
     },
     "Node2Vec (unaligned)": {
-      "coherence": 0.54,
+      "coherence": 0.551,
       "base_rate": 0.57,
-      "lift": 0.95,
+      "lift": 0.97,
+      "n": 1681
+    },
+    "GraphWave (structural)": {
+      "coherence": 0.653,
+      "base_rate": 0.57,
+      "lift": 1.14,
       "n": 1681
     },
     "Hybrid (tabular + topology)": {
       "coherence": 0.758,
       "base_rate": 0.57,
       "lift": 1.33,
+      "n": 1681
+    },
+    "Hybrid + GraphWave": {
+      "coherence": 0.746,
+      "base_rate": 0.57,
+      "lift": 1.31,
       "n": 1681
     }
   },

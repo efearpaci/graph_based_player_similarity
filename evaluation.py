@@ -41,7 +41,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import StandardScaler
 
 from build_dataset import LEAGUES, fix_text
-from engine import N2V_DIM, build_graph_features, build_graphs
+from engine import GW_DIM, N2V_DIM, build_graph_features, build_graphs
 from real_data import _refine_role_label
 
 PROCESSED = Path(__file__).parent / "data" / "processed"
@@ -57,12 +57,15 @@ TOPOLOGY = ["in_degree", "out_degree", "betweenness", "pagerank",
             "closeness", "clustering", "total_xt_generated",
             "def_pagerank", "def_in_degree", "def_out_degree"]
 NODE2VEC = [f"p_n2v_{i}" for i in range(N2V_DIM)] + [f"d_n2v_{i}" for i in range(N2V_DIM)]
+GRAPHWAVE = [f"gw_p_{i}" for i in range(GW_DIM)] + [f"gw_d_{i}" for i in range(GW_DIM)]
 
 CONFIGS = {
     "Tabular (per-90 stats)": TABULAR,
     "Graph topology": TOPOLOGY,
     "Node2Vec (unaligned)": NODE2VEC,
+    "GraphWave (structural)": GRAPHWAVE,
     "Hybrid (tabular + topology)": TABULAR + TOPOLOGY,
+    "Hybrid + GraphWave": TABULAR + TOPOLOGY + GRAPHWAVE,
 }
 
 POSITIONS = ["Goalkeeper", "Defender", "Midfielder", "Forward"]

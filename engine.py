@@ -16,6 +16,9 @@ from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
 from sklearn.preprocessing import StandardScaler
 
 N2V_DIM = 8
+GW_SCALES = 2       # GraphWave heat-kernel scales (auto-selected per graph)
+GW_POINTS = 4       # characteristic-function sample points per scale
+GW_DIM = GW_SCALES * GW_POINTS * 2  # (Re, Im) per sample point
 
 # ---------------------------------------------------------------- groups ---
 FEATURE_GROUPS = {
@@ -29,7 +32,10 @@ FEATURE_GROUPS = {
     "Passing Network": ["in_degree", "out_degree", "betweenness", "pagerank",
                         "closeness", "clustering", "total_xt_generated"],
     "Defensive Synergy": ["def_pagerank", "def_in_degree", "def_out_degree"],
-    "Style Embeddings": [f"p_n2v_{i}" for i in range(N2V_DIM)] + [f"d_n2v_{i}" for i in range(N2V_DIM)],
+    "Structural Embeddings (GraphWave)":
+        [f"gw_p_{i}" for i in range(GW_DIM)] + [f"gw_d_{i}" for i in range(GW_DIM)],
+    "Style Embeddings (Node2Vec)":
+        [f"p_n2v_{i}" for i in range(N2V_DIM)] + [f"d_n2v_{i}" for i in range(N2V_DIM)],
 }
 
 GROUP_DESCRIPTIONS = {
@@ -40,21 +46,27 @@ GROUP_DESCRIPTIONS = {
     "Goalkeeping": "Saves, save rate, sweeping exits (per 90)",
     "Passing Network": "Graph centralities from the team's season passing network",
     "Defensive Synergy": "Influence in the defensive co-action network",
-    "Style Embeddings": "Node2Vec latent style vectors (passing + defensive)",
+    "Structural Embeddings (GraphWave)":
+        "Heat-wavelet structural role signatures — comparable across teams",
+    "Style Embeddings (Node2Vec)":
+        "Random-walk embeddings — NOT aligned across teams (kept for comparison)",
 }
 
 POSITION_GROUP_DEFAULTS = {
-    "Goalkeeper": ["Goalkeeping", "Passing Network", "Defensive Synergy", "Style Embeddings"],
-    "Defender": ["Defending", "Physique", "Passing Network", "Defensive Synergy", "Style Embeddings"],
+    "Goalkeeper": ["Goalkeeping", "Passing Network", "Defensive Synergy",
+                   "Structural Embeddings (GraphWave)"],
+    "Defender": ["Defending", "Physique", "Passing Network", "Defensive Synergy",
+                 "Structural Embeddings (GraphWave)"],
     "Midfielder": ["Creation & Passing", "Attacking", "Defending",
-                   "Passing Network", "Style Embeddings"],
+                   "Passing Network", "Structural Embeddings (GraphWave)"],
     "Forward": ["Attacking", "Creation & Passing", "Physique",
-                "Passing Network", "Style Embeddings"],
+                "Passing Network", "Structural Embeddings (GraphWave)"],
 }
 
 POSITION_GROUP_OPTIONS = {
     "Goalkeeper": ["Goalkeeping", "Defending", "Physique", "Creation & Passing",
-                   "Passing Network", "Defensive Synergy", "Style Embeddings"],
+                   "Passing Network", "Defensive Synergy",
+                   "Structural Embeddings (GraphWave)", "Style Embeddings (Node2Vec)"],
     "Defender": [g for g in FEATURE_GROUPS if g != "Goalkeeping"],
     "Midfielder": [g for g in FEATURE_GROUPS if g != "Goalkeeping"],
     "Forward": [g for g in FEATURE_GROUPS if g != "Goalkeeping"],
@@ -78,6 +90,54 @@ def build_graphs(pass_df, def_df):
                        weight=row.synergy_score)
         def_graphs[team] = D
     return pass_graphs, def_graphs
+
+
+def graphwave_embeddings(G, n_points=GW_POINTS, etas=(0.95, 0.80)):
+    """
+    GraphWave (Donnat et al., KDD 2018): structural node embeddings from the
+    empirical characteristic function of spectral heat-wavelet coefficients.
+
+    Unlike Node2Vec, these are deterministic functions of a node's structural
+    role, so embeddings from DIFFERENT graphs live in the same space — which is
+    what cross-team player comparison requires.
+
+    Returns {node: vector of len(etas) * n_points * 2}.
+    """
+    nodes = list(G.nodes())
+    n = len(nodes)
+    dim = len(etas) * n_points * 2
+    if n < 3:
+        return {v: np.zeros(dim) for v in nodes}
+
+    # symmetric, scale-normalised adjacency (teams have different weight scales)
+    A = nx.to_numpy_array(G, nodelist=nodes, weight="weight")
+    A = (A + A.T) / 2.0
+    nz = A[A > 0]
+    if nz.size:
+        A = A / nz.mean()
+    L = np.diag(A.sum(axis=1)) - A
+
+    lam, U = np.linalg.eigh(L)
+    lam = np.clip(lam, 0.0, None)
+    pos = lam[lam > 1e-8]
+    if pos.size == 0:
+        return {v: np.zeros(dim) for v in nodes}
+
+    # automatic scale selection around the spectrum's geometric mean
+    s_ref = np.sqrt(pos[0] * pos[-1])
+    taus = [-np.log(eta) / s_ref for eta in etas]
+    t_pts = np.linspace(0, 100, n_points + 1)[1:]   # skip t=0 (constant)
+
+    feats = np.empty((n, dim))
+    k = 0
+    for s in taus:
+        Psi = U @ np.diag(np.exp(-s * lam)) @ U.T   # column a = wavelet at node a
+        for t in t_pts:
+            phi = np.exp(1j * t * Psi).mean(axis=0)  # characteristic fn per node
+            feats[:, k] = phi.real
+            feats[:, k + 1] = phi.imag
+            k += 2
+    return {v: feats[i] for i, v in enumerate(nodes)}
 
 
 def build_graph_features(pass_graphs, def_graphs, progress=None):
@@ -111,6 +171,9 @@ def build_graph_features(pass_graphs, def_graphs, progress=None):
                                workers=1, quiet=True)
             model_def = n2v_def.fit(window=5, min_count=1, batch_words=4)
 
+        gw_pass = graphwave_embeddings(G)
+        gw_def = graphwave_embeddings(D) if len(D) else {}
+
         for node in G.nodes():
             row = {
                 "player_name": node,
@@ -130,6 +193,11 @@ def build_graph_features(pass_graphs, def_graphs, progress=None):
             for i in range(N2V_DIM):
                 has = model_def is not None and node in model_def.wv
                 row[f"d_n2v_{i}"] = float(model_def.wv[node][i]) if has else 0.0
+            for i, v in enumerate(gw_pass[node]):
+                row[f"gw_p_{i}"] = float(v)
+            gw_d = gw_def.get(node)
+            for i in range(GW_DIM):
+                row[f"gw_d_{i}"] = float(gw_d[i]) if gw_d is not None else 0.0
             rows.append(row)
 
     return pd.DataFrame(rows)

@@ -44,7 +44,7 @@ Traditional football scouting relies on independent, tabular metrics (passes com
 2. **Substitution pairs** (Yılmaz & Öğüdücü 2022) — real same-position substitutions as weak interchangeability labels.
 3. **Role coherence** — do a player's top-5 neighbours share their refined role label?
 
-Headline findings: per-90 event stats are a strong identity fingerprint (top-5 retrieval 37% from pools of ~400 vs ~1% random); naive Node2Vec fails across graphs because independently trained embedding spaces are unaligned — motivating structurally comparable embeddings (e.g. GraphWave) as future work; role coherence reaches 77% vs a 57% base rate.
+Headline findings: per-90 event stats are a strong identity fingerprint (top-5 retrieval 37% from pools of ~400 vs ~1% random). Naive Node2Vec fails across graphs because independently trained embedding spaces are unaligned (top-5 1.9%, role lift ×0.97). **GraphWave** (Donnat et al. 2018) — implemented in `engine.graphwave_embeddings` — fixes this by construction: deterministic heat-wavelet role signatures are comparable across teams (cross-team GK–GK cosine ≈ 0.999) and beat Node2Vec on every metric (top-5 4.0% vs 1.9%, role lift ×1.14 vs ×0.97). Structure encodes *role* rather than *identity*, so tabular stats remain the strongest individual fingerprint — the two are complementary, which is why the app combines them with scout-controlled weights.
 
 ## Method notes
 - **Receiver reconstruction:** Wyscout doesn't record pass receivers; for accurate passes the receiver is taken as the next event of the same team (standard in the passing-network literature).
