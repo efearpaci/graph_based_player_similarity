@@ -1,0 +1,208 @@
+{
+  "identity_retrieval": {
+    "Tabular (per-90 stats)": {
+      "overall": {
+        "n": 1235,
+        "top1": 0.168,
+        "top5": 0.374,
+        "mrr": 0.276,
+        "median_rank": 11
+      },
+      "per_position": {
+        "Goalkeeper": {
+          "n": 97,
+          "top1": 0.082,
+          "top5": 0.237,
+          "mrr": 0.187,
+          "median_rank": 13
+        },
+        "Defender": {
+          "n": 471,
+          "top1": 0.106,
+          "top5": 0.287,
+          "mrr": 0.204,
+          "median_rank": 19
+        },
+        "Midfielder": {
+          "n": 443,
+          "top1": 0.212,
+          "top5": 0.431,
+          "mrr": 0.326,
+          "median_rank": 8
+        },
+        "Forward": {
+          "n": 224,
+          "top1": 0.246,
+          "top5": 0.504,
+          "mrr": 0.364,
+          "median_rank": 5
+        }
+      }
+    },
+    "Graph topology": {
+      "overall": {
+        "n": 1235,
+        "top1": 0.018,
+        "top5": 0.079,
+        "mrr": 0.064,
+        "median_rank": 69
+      },
+      "per_position": {
+        "Goalkeeper": {
+          "n": 97,
+          "top1": 0.01,
+          "top5": 0.093,
+          "mrr": 0.081,
+          "median_rank": 27
+        },
+        "Defender": {
+          "n": 471,
+          "top1": 0.011,
+          "top5": 0.051,
+          "mrr": 0.045,
+          "median_rank": 105
+        },
+        "Midfielder": {
+          "n": 443,
+          "top1": 0.014,
+          "top5": 0.081,
+          "mrr": 0.061,
+          "median_rank": 88
+        },
+        "Forward": {
+          "n": 224,
+          "top1": 0.045,
+          "top5": 0.129,
+          "mrr": 0.101,
+          "median_rank": 45
+        }
+      }
+    },
+    "Node2Vec (unaligned)": {
+      "overall": {
+        "n": 1235,
+        "top1": 0.006,
+        "top5": 0.024,
+        "mrr": 0.028,
+        "median_rank": 130
+      },
+      "per_position": {
+        "Goalkeeper": {
+          "n": 97,
+          "top1": 0.021,
+          "top5": 0.103,
+          "mrr": 0.08,
+          "median_rank": 31
+        },
+        "Defender": {
+          "n": 471,
+          "top1": 0.006,
+          "top5": 0.017,
+          "mrr": 0.022,
+          "median_rank": 164
+        },
+        "Midfielder": {
+          "n": 443,
+          "top1": 0.005,
+          "top5": 0.009,
+          "mrr": 0.02,
+          "median_rank": 170
+        },
+        "Forward": {
+          "n": 224,
+          "top1": 0.0,
+          "top5": 0.036,
+          "mrr": 0.035,
+          "median_rank": 78
+        }
+      }
+    },
+    "Hybrid (tabular + topology)": {
+      "overall": {
+        "n": 1235,
+        "top1": 0.138,
+        "top5": 0.315,
+        "mrr": 0.232,
+        "median_rank": 16
+      },
+      "per_position": {
+        "Goalkeeper": {
+          "n": 97,
+          "top1": 0.082,
+          "top5": 0.196,
+          "mrr": 0.178,
+          "median_rank": 16
+        },
+        "Defender": {
+          "n": 471,
+          "top1": 0.104,
+          "top5": 0.234,
+          "mrr": 0.184,
+          "median_rank": 25
+        },
+        "Midfielder": {
+          "n": 443,
+          "top1": 0.151,
+          "top5": 0.359,
+          "mrr": 0.252,
+          "median_rank": 13
+        },
+        "Forward": {
+          "n": 224,
+          "top1": 0.205,
+          "top5": 0.451,
+          "mrr": 0.318,
+          "median_rank": 7
+        }
+      }
+    },
+    "_random_baseline": {
+      "top1": 0.0048,
+      "top5": 0.0239,
+      "pool_sizes": [
+        97,
+        471,
+        443,
+        224
+      ]
+    }
+  },
+  "substitution_pairs": {
+    "n_pairs": 3480,
+    "skipped_cross_position": 3556,
+    "hit@1": 0.175,
+    "hit@3": 0.498,
+    "random@1": 0.144,
+    "random@3": 0.426
+  },
+  "role_coherence": {
+    "Tabular (per-90 stats)": {
+      "coherence": 0.768,
+      "base_rate": 0.57,
+      "lift": 1.35,
+      "n": 1681
+    },
+    "Graph topology": {
+      "coherence": 0.707,
+      "base_rate": 0.57,
+      "lift": 1.24,
+      "n": 1681
+    },
+    "Node2Vec (unaligned)": {
+      "coherence": 0.54,
+      "base_rate": 0.57,
+      "lift": 0.95,
+      "n": 1681
+    },
+    "Hybrid (tabular + topology)": {
+      "coherence": 0.758,
+      "base_rate": 0.57,
+      "lift": 1.33,
+      "n": 1681
+    }
+  },
+  "meta": {
+    "dataset": "Wyscout/Pappalardo Big-5 leagues 2017/18",
+    "half_split": "first vs second half of season by match date, eligibility \u2265450 min per half"
+  }
+}

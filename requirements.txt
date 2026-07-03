@@ -6,3 +6,5 @@ node2vec
 scikit-learn
 pyvis
 plotly
+requests
+pyarrow

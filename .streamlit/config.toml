@@ -3,3 +3,11 @@ level = "error"
 
 [server]
 fileWatcherType = "none"
+
+[theme]
+base = "dark"
+primaryColor = "#a855f7"
+backgroundColor = "#0a0812"
+secondaryBackgroundColor = "#151021"
+textColor = "#e8e3f5"
+font = "sans serif"
