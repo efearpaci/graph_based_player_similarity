@@ -1,0 +1,104 @@
+{
+ "weights": {
+  "Goalkeeper": {
+   "Goalkeeping": 1.0,
+   "Defending": 1.0,
+   "Physique": 1.0,
+   "Creation & Passing": 1.0,
+   "Passing Network": 1.0,
+   "Defensive Synergy": 1.0,
+   "Structural Embeddings (GraphWave)": 1.0
+  },
+  "Defender": {
+   "Attacking": 1.0,
+   "Creation & Passing": 3.0,
+   "Defending": 3.0,
+   "Physique": 1.5,
+   "Passing Network": 0.25,
+   "Defensive Synergy": 0.25,
+   "Structural Embeddings (GraphWave)": 0.0
+  },
+  "Midfielder": {
+   "Attacking": 1.5,
+   "Creation & Passing": 3.0,
+   "Defending": 0.25,
+   "Physique": 0.25,
+   "Passing Network": 1.0,
+   "Defensive Synergy": 0.0,
+   "Structural Embeddings (GraphWave)": 0.0
+  },
+  "Forward": {
+   "Attacking": 2.0,
+   "Creation & Passing": 3.0,
+   "Defending": 2.0,
+   "Physique": 1.0,
+   "Passing Network": 0.0,
+   "Defensive Synergy": 3.0,
+   "Structural Embeddings (GraphWave)": 0.0
+  }
+ },
+ "validation": {
+  "Defender": {
+   "val_baseline_hit3": 0.5229,
+   "val_learned_hit3": 0.7248,
+   "n_val_trials": 109
+  },
+  "Midfielder": {
+   "val_baseline_hit3": 0.3991,
+   "val_learned_hit3": 0.4902,
+   "n_val_trials": 461
+  },
+  "Forward": {
+   "val_baseline_hit3": 0.7406,
+   "val_learned_hit3": 0.7857,
+   "n_val_trials": 266
+  }
+ },
+ "test": {
+  "Goalkeeper": {
+   "baseline": {
+    "hit@1": 0.6667,
+    "hit@3": 1.0
+   },
+   "learned": {
+    "hit@1": 0.6667,
+    "hit@3": 1.0
+   },
+   "n_trials": 6
+  },
+  "Defender": {
+   "baseline": {
+    "hit@1": 0.1822,
+    "hit@3": 0.5056
+   },
+   "learned": {
+    "hit@1": 0.1673,
+    "hit@3": 0.5651
+   },
+   "n_trials": 269
+  },
+  "Midfielder": {
+   "baseline": {
+    "hit@1": 0.1378,
+    "hit@3": 0.422
+   },
+   "learned": {
+    "hit@1": 0.1741,
+    "hit@3": 0.4885
+   },
+   "n_trials": 827
+  },
+  "Forward": {
+   "baseline": {
+    "hit@1": 0.2252,
+    "hit@3": 0.695
+   },
+   "learned": {
+    "hit@1": 0.2465,
+    "hit@3": 0.7057
+   },
+   "n_trials": 564
+  }
+ },
+ "objective": "val hit@3 (tie-break hit@1), random search + coordinate ascent, engineered groups only"
+}

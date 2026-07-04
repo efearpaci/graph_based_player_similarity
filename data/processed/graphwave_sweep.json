@@ -1,0 +1,29 @@
+[
+ {
+  "n_points": 2,
+  "dims_total": 16,
+  "identity_top5": 0.0388,
+  "role_coherence": 0.6415,
+  "role_lift": 1.14,
+  "val_sub_hit1": 0.1514,
+  "val_sub_hit3": 0.4911
+ },
+ {
+  "n_points": 4,
+  "dims_total": 32,
+  "identity_top5": 0.0404,
+  "role_coherence": 0.647,
+  "role_lift": 1.15,
+  "val_sub_hit1": 0.1454,
+  "val_sub_hit3": 0.4887
+ },
+ {
+  "n_points": 8,
+  "dims_total": 64,
+  "identity_top5": 0.042,
+  "role_coherence": 0.6506,
+  "role_lift": 1.15,
+  "val_sub_hit1": 0.1585,
+  "val_sub_hit3": 0.4946
+ }
+]

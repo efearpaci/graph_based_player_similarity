@@ -47,18 +47,22 @@ import pandas as pd
 
 ir_all = res["identity_retrieval"]
 rc_all = res["role_coherence"]
+sub_all = res["substitution_pairs"].get("configs", {})
 summary_rows = []
 for cfg in ir_all:
     if cfg.startswith("_"):
         continue
     o = ir_all[cfg]["overall"]
     rc = rc_all.get(cfg, {})
+    sb = sub_all.get(cfg, {})
     summary_rows.append({
         "Algorithm / features": cfg,
         "Identity top-1": f"{o['top1']*100:.1f}%",
         "Identity top-5": f"{o['top5']*100:.1f}%",
         "MRR": f"{o['mrr']:.3f}",
         "Median rank": o["median_rank"],
+        "Sub hit@1": f"{sb.get('hit@1', 0)*100:.1f}%",
+        "Sub hit@3": f"{sb.get('hit@3', 0)*100:.1f}%",
         "Role coherence": f"{rc.get('coherence', 0)*100:.1f}%",
         "Role lift": f"×{rc.get('lift', 0)}",
     })
@@ -120,21 +124,37 @@ with st.expander("Per-position breakdown"):
     st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 
 # ------------------------------------------------- 2. substitution pairs ---
-st.markdown('<p class="section-label">2 · Real substitution pairs</p>',
+st.markdown('<p class="section-label">2 · Real substitution pairs (held-out)</p>',
             unsafe_allow_html=True)
 sub = res["substitution_pairs"]
 st.markdown(
-    f"Across **{sub['n_pairs']:,}** real same-position substitutions, the hybrid "
-    "engine ranks the player who actually came on among the squad's candidates:")
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("Hit@1", f"{sub['hit@1']*100:.1f}%",
-          delta=f"+{(sub['hit@1']-sub['random@1'])*100:.1f} pts vs random")
-c2.metric("Random@1", f"{sub['random@1']*100:.1f}%")
-c3.metric("Hit@3", f"{sub['hit@3']*100:.1f}%",
-          delta=f"+{(sub['hit@3']-sub['random@3'])*100:.1f} pts vs random")
-c4.metric("Random@3", f"{sub['random@3']*100:.1f}%")
-st.caption(f"{sub['skipped_cross_position']:,} cross-position substitutions excluded "
-           "(tactical switches, not like-for-like replacements).")
+    f"Across **{sub['n_pairs']:,}** real same-position substitutions "
+    f"({sub['note']}), each algorithm ranks the player who actually came on "
+    "among the squad's candidates. The **Triplet metric was trained on earlier "
+    "substitutions only** — this is its true test set, and every method is "
+    "scored on the same pairs.")
+
+fig_sub = go.Figure()
+sub_configs = list(sub["configs"])
+for metric, color in [("hit@1", PURPLE), ("hit@3", FUCHSIA)]:
+    fig_sub.add_trace(go.Bar(
+        name=metric,
+        x=[sub["configs"][c][metric] * 100 for c in sub_configs],
+        y=sub_configs, orientation="h", marker_color=color,
+        text=[f"{sub['configs'][c][metric]*100:.1f}%" for c in sub_configs],
+        textposition="outside",
+    ))
+for base, dash in [("random@1", "dot"), ("random@3", "dash")]:
+    fig_sub.add_vline(x=sub[base] * 100, line_dash=dash, line_color=MUTED,
+                      annotation_text=base, annotation_font_color=MUTED)
+fig_sub.update_layout(
+    barmode="group", height=90 + 52 * len(sub_configs),
+    xaxis=dict(range=[0, 78], gridcolor="#241b38", title="hit rate (%)"),
+    yaxis=dict(autorange="reversed"),
+    legend=dict(orientation="h", y=1.1),
+    margin=dict(l=10, r=10, t=10, b=10), **PLOTLY_LAYOUT,
+)
+st.plotly_chart(fig_sub, use_container_width=True)
 
 # ---------------------------------------------------- 3. role coherence ---
 st.markdown('<p class="section-label">3 · Role coherence of top-5 neighbours</p>',

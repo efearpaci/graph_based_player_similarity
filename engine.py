@@ -36,6 +36,7 @@ FEATURE_GROUPS = {
         [f"gw_p_{i}" for i in range(GW_DIM)] + [f"gw_d_{i}" for i in range(GW_DIM)],
     "Style Embeddings (Node2Vec)":
         [f"p_n2v_{i}" for i in range(N2V_DIM)] + [f"d_n2v_{i}" for i in range(N2V_DIM)],
+    "Learned Similarity (Triplet)": [f"tr_{i}" for i in range(32)],
 }
 
 GROUP_DESCRIPTIONS = {
@@ -50,6 +51,8 @@ GROUP_DESCRIPTIONS = {
         "Heat-wavelet structural role signatures — comparable across teams",
     "Style Embeddings (Node2Vec)":
         "Random-walk embeddings — NOT aligned across teams (kept for comparison)",
+    "Learned Similarity (Triplet)":
+        "Deep metric learning: distance trained on real substitution pairs",
 }
 
 POSITION_GROUP_DEFAULTS = {
@@ -66,7 +69,8 @@ POSITION_GROUP_DEFAULTS = {
 POSITION_GROUP_OPTIONS = {
     "Goalkeeper": ["Goalkeeping", "Defending", "Physique", "Creation & Passing",
                    "Passing Network", "Defensive Synergy",
-                   "Structural Embeddings (GraphWave)", "Style Embeddings (Node2Vec)"],
+                   "Structural Embeddings (GraphWave)", "Style Embeddings (Node2Vec)",
+                   "Learned Similarity (Triplet)"],
     "Defender": [g for g in FEATURE_GROUPS if g != "Goalkeeping"],
     "Midfielder": [g for g in FEATURE_GROUPS if g != "Goalkeeping"],
     "Forward": [g for g in FEATURE_GROUPS if g != "Goalkeeping"],

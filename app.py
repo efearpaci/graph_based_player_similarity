@@ -24,6 +24,7 @@ from real_data import data_available, load_real_data
 # ------------------------------------------------------------------ theme ---
 PURPLE = "#a855f7"
 FUCHSIA = "#d946ef"
+AMBER = "#fbbf24"   # warm accent — high contrast against purple in comparisons
 BG = "#0a0812"
 TEXT = "#e8e3f5"
 MUTED = "#9d93b8"
@@ -35,6 +36,17 @@ PLOTLY_LAYOUT = dict(
 )
 
 FEATURES_CACHE = Path(__file__).parent / "data" / "processed" / "graph_features.parquet"
+LEARNED_WEIGHTS = Path(__file__).parent / "data" / "processed" / "learned_weights.json"
+
+
+@st.cache_data
+def load_learned_weights():
+    """Per-position group weights optimised on validation substitutions
+    (learn_weights.py). Used as slider defaults; scouts can still override."""
+    if LEARNED_WEIGHTS.exists():
+        import json
+        return json.loads(LEARNED_WEIGHTS.read_text()).get("weights", {})
+    return {}
 
 
 # ------------------------------------------------------------------- data ---
@@ -59,6 +71,14 @@ def load_engine(players_df, pass_df, def_df):
         bar.empty()
 
     features_df = players_df.merge(graph_feats, on="player_name", how="inner")
+    triplet_path = FEATURES_CACHE.parent / "triplet_embeddings.parquet"
+    if triplet_path.exists():
+        tr_df = pd.read_parquet(triplet_path)
+        features_df = features_df.merge(tr_df, on="player_name", how="left")
+        # embedding size is a tuned hyperparameter — sync the group definition
+        tr_cols = [c for c in tr_df.columns if c.startswith("tr_")]
+        FEATURE_GROUPS["Learned Similarity (Triplet)"] = tr_cols
+        features_df[tr_cols] = features_df[tr_cols].fillna(0)
     features_df = assign_archetypes(features_df)
     return pass_graphs, def_graphs, features_df
 
@@ -108,7 +128,7 @@ def network_html(G, coords, target=None, height="430px", max_edges=110):
 
 def radar_figure(profiles, names):
     fig = go.Figure()
-    colors = [PURPLE, FUCHSIA]
+    colors = [PURPLE, AMBER]
     for (profile, name, color) in zip(profiles, names, colors):
         cats = list(profile.keys())
         vals = list(profile.values())
@@ -175,12 +195,21 @@ with st.sidebar:
     st.markdown('<p class="section-label">Scouting target</p>', unsafe_allow_html=True)
 
     eligible = features_df[features_df["eligible"]]
-    display = eligible.sort_values(["league", "team_name", "player_name"])
-    labels = [f"{r.player_name}  ·  {r.team_name}" for r in display.itertuples()]
-    label_to_name = {l: r.player_name for l, r in zip(labels, display.itertuples())}
+
+    target_league = st.selectbox("League", sorted(eligible["league"].unique()))
+    league_pool = eligible[eligible["league"] == target_league]
+
+    target_team = st.selectbox("Team", sorted(league_pool["team_name"].unique()))
+    team_pool = league_pool[league_pool["team_name"] == target_team] \
+        .sort_values(["position", "player_name"])
+
+    player_labels = [f"{r.player_name}  ·  {r.role_label}"
+                     for r in team_pool.itertuples()]
+    label_to_name = {l: r.player_name
+                     for l, r in zip(player_labels, team_pool.itertuples())}
     selected_label = st.selectbox(
-        "Search a player to replace", labels,
-        help=f"{len(eligible):,} players with ≥900 minutes played. Type to search.")
+        "Player to replace", player_labels,
+        help="Players with ≥900 minutes for this team. Type in any dropdown to search.")
     target_name = label_to_name[selected_label]
     target = features_df[features_df["player_name"] == target_name].iloc[0]
 
@@ -192,7 +221,8 @@ with st.sidebar:
     st.markdown('<p class="section-label">Comparison parameters</p>', unsafe_allow_html=True)
     st.caption(f"Choose what *similar* means for this **{target['position']}**.")
 
-    options = POSITION_GROUP_OPTIONS[target["position"]]
+    options = [g for g in POSITION_GROUP_OPTIONS[target["position"]]
+               if all(c in features_df.columns for c in FEATURE_GROUPS[g])]
     defaults = POSITION_GROUP_DEFAULTS[target["position"]]
 
     selected_groups, group_weights = [], {}
@@ -202,11 +232,18 @@ with st.sidebar:
         if on:
             selected_groups.append(group)
 
+    learned_w = load_learned_weights().get(target["position"], {})
     with st.expander("⚖️ Group weights"):
-        st.caption("How much each selected group matters (1.0 = neutral).")
+        if learned_w:
+            st.caption(f"Defaults are **learned from real substitutions** for "
+                       f"{target['position']}s (validation-optimised). "
+                       "1.0 = neutral; adjust freely.")
+        else:
+            st.caption("How much each selected group matters (1.0 = neutral).")
         for group in selected_groups:
-            group_weights[group] = st.slider(group, 0.0, 3.0, 1.0, 0.25,
-                                             key=f"w_{group}")
+            group_weights[group] = st.slider(
+                group, 0.0, 3.0, float(learned_w.get(group, 1.0)), 0.25,
+                key=f"w_{target['position']}_{group}")
 
     st.divider()
     st.markdown('<p class="section-label">Search settings</p>', unsafe_allow_html=True)
@@ -312,7 +349,13 @@ with tab_algo:
         "Graph topology": ["Passing Network", "Defensive Synergy"],
         "Node2Vec": ["Style Embeddings (Node2Vec)"],
         "GraphWave": ["Structural Embeddings (GraphWave)"],
+        "Triplet (learned)": ["Learned Similarity (Triplet)"],
         "Your selection": None,  # scout's current groups + weights
+    }
+    ALGO_CONFIGS = {
+        name: groups for name, groups in ALGO_CONFIGS.items()
+        if groups is None or all(c in features_df.columns
+                                 for g in groups for c in FEATURE_GROUPS[g])
     }
 
     current_set = set(results["player_name"])

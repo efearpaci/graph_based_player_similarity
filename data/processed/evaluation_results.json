@@ -234,6 +234,45 @@
         }
       }
     },
+    "Triplet (learned metric)": {
+      "overall": {
+        "n": 1235,
+        "top1": 0.036,
+        "top5": 0.104,
+        "mrr": 0.084,
+        "median_rank": 67
+      },
+      "per_position": {
+        "Goalkeeper": {
+          "n": 97,
+          "top1": 0.021,
+          "top5": 0.082,
+          "mrr": 0.09,
+          "median_rank": 26
+        },
+        "Defender": {
+          "n": 471,
+          "top1": 0.028,
+          "top5": 0.076,
+          "mrr": 0.068,
+          "median_rank": 86
+        },
+        "Midfielder": {
+          "n": 443,
+          "top1": 0.047,
+          "top5": 0.126,
+          "mrr": 0.094,
+          "median_rank": 92
+        },
+        "Forward": {
+          "n": 224,
+          "top1": 0.04,
+          "top5": 0.129,
+          "mrr": 0.095,
+          "median_rank": 52
+        }
+      }
+    },
     "_random_baseline": {
       "top1": 0.0048,
       "top5": 0.0239,
@@ -246,12 +285,40 @@
     }
   },
   "substitution_pairs": {
-    "n_pairs": 3480,
-    "skipped_cross_position": 3556,
-    "hit@1": 0.175,
-    "hit@3": 0.498,
-    "random@1": 0.144,
-    "random@3": 0.426
+    "n_pairs": 1666,
+    "note": "held-out test pairs (matches after 2018-02-25)",
+    "random@1": 0.154,
+    "random@3": 0.458,
+    "configs": {
+      "Tabular (per-90 stats)": {
+        "hit@1": 0.221,
+        "hit@3": 0.565
+      },
+      "Graph topology": {
+        "hit@1": 0.151,
+        "hit@3": 0.489
+      },
+      "Node2Vec (unaligned)": {
+        "hit@1": 0.155,
+        "hit@3": 0.469
+      },
+      "GraphWave (structural)": {
+        "hit@1": 0.161,
+        "hit@3": 0.469
+      },
+      "Hybrid (tabular + topology)": {
+        "hit@1": 0.185,
+        "hit@3": 0.545
+      },
+      "Hybrid + GraphWave": {
+        "hit@1": 0.181,
+        "hit@3": 0.507
+      },
+      "Triplet (learned metric)": {
+        "hit@1": 0.266,
+        "hit@3": 0.603
+      }
+    }
   },
   "role_coherence": {
     "Tabular (per-90 stats)": {
@@ -288,6 +355,12 @@
       "coherence": 0.746,
       "base_rate": 0.57,
       "lift": 1.31,
+      "n": 1681
+    },
+    "Triplet (learned metric)": {
+      "coherence": 0.715,
+      "base_rate": 0.57,
+      "lift": 1.25,
       "n": 1681
     }
   },

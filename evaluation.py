@@ -58,6 +58,7 @@ TOPOLOGY = ["in_degree", "out_degree", "betweenness", "pagerank",
             "def_pagerank", "def_in_degree", "def_out_degree"]
 NODE2VEC = [f"p_n2v_{i}" for i in range(N2V_DIM)] + [f"d_n2v_{i}" for i in range(N2V_DIM)]
 GRAPHWAVE = [f"gw_p_{i}" for i in range(GW_DIM)] + [f"gw_d_{i}" for i in range(GW_DIM)]
+TRIPLET = [f"tr_{i}" for i in range(32)]
 
 CONFIGS = {
     "Tabular (per-90 stats)": TABULAR,
@@ -66,7 +67,26 @@ CONFIGS = {
     "GraphWave (structural)": GRAPHWAVE,
     "Hybrid (tabular + topology)": TABULAR + TOPOLOGY,
     "Hybrid + GraphWave": TABULAR + TOPOLOGY + GRAPHWAVE,
+    "Triplet (learned metric)": TRIPLET,
 }
+
+
+def merge_triplet(df, suffix=""):
+    """Attach learned triplet embeddings if train_metric.py has been run."""
+    path = PROCESSED / f"triplet_embeddings{suffix}.parquet"
+    if path.exists():
+        df = df.merge(pd.read_parquet(path), on="player_name", how="left")
+    return df
+
+
+def available_configs(df):
+    # triplet embedding size is a tuned hyperparameter — derive cols from data
+    tr = sorted([c for c in df.columns if c.startswith("tr_")],
+                key=lambda c: int(c.split("_")[1]))
+    if tr:
+        CONFIGS["Triplet (learned metric)"] = tr
+    return {name: cols for name, cols in CONFIGS.items()
+            if all(c in df.columns for c in cols)}
 
 POSITIONS = ["Goalkeeper", "Defender", "Midfielder", "Forward"]
 
@@ -85,13 +105,13 @@ def half_features(suffix):
         print(f"  building graph features for {len(pg)} teams [{suffix}] …")
         gf = build_graph_features(pg, dg)
         gf.to_parquet(cache, index=False)
-    return players.merge(gf, on="player_name", how="inner")
+    return merge_triplet(players.merge(gf, on="player_name", how="inner"), suffix)
 
 
 def full_features():
     players = pd.read_parquet(PROCESSED / "players.parquet")
     gf = pd.read_parquet(PROCESSED / "graph_features.parquet")
-    df = players.merge(gf, on="player_name", how="inner")
+    df = merge_triplet(players.merge(gf, on="player_name", how="inner"))
     df["role_label"] = df.apply(_refine_role_label, axis=1)
     return df
 
@@ -114,7 +134,9 @@ def identity_retrieval():
     assert h1.index.equals(h2.index)
 
     results = {}
-    for config, cols in CONFIGS.items():
+    configs = {c: cols for c, cols in available_configs(h1).items()
+               if all(col in h2.columns for col in cols)}
+    for config, cols in configs.items():
         per_pos = {}
         ranks_all = []
         for pos in POSITIONS:
@@ -163,6 +185,62 @@ def identity_retrieval():
 
 
 # ------------------------------------------------- 2. substitution pairs ---
+def dedupe_by_id(features):
+    """One row per player (mid-season league movers appear twice)."""
+    return features.sort_values("minutes", ascending=False) \
+                   .drop_duplicates(subset="player_id").set_index("player_id")
+
+
+def build_sub_trials(feats, pairs):
+    """Resolve substitution pairs into ranking trials.
+
+    feats: dedupe_by_id() frame. pairs: iterable of (out_id, in_id, team).
+    Returns (trials, random@1, random@3) where each trial is
+    (p_out, p_in, position, candidate_ids) with candidates = same squad,
+    same position, excluding the leaving player.
+    """
+    trials = []
+    rand1 = rand3 = 0.0
+    for p_out, p_in, team in pairs:
+        if p_out not in feats.index or p_in not in feats.index:
+            continue
+        pos = feats.loc[p_out, "position"]
+        if feats.loc[p_in, "position"] != pos:
+            continue
+        cand = [c for c in feats[(feats.team_name == team)
+                                 & (feats.position == pos)].index if c != p_out]
+        if p_in not in cand or len(cand) < 2:
+            continue
+        trials.append((p_out, p_in, pos, cand))
+        rand1 += 1 / len(cand)
+        rand3 += min(1, 3 / len(cand))
+    n = max(1, len(trials))
+    return trials, rand1 / n, rand3 / n
+
+
+def sub_hit_rates(feats, cols, trials, col_weights=None):
+    """hit@1 / hit@3 of ranking the true replacement, cosine over `cols`
+    (z-scored within position pools, optionally per-column weighted)."""
+    scaled = {}
+    for pos in POSITIONS:
+        pool = feats[feats.position == pos]
+        X = StandardScaler().fit_transform(pool[cols].fillna(0))
+        if col_weights is not None:
+            X = X * np.asarray(col_weights)
+        scaled[pos] = pd.DataFrame(X, index=pool.index)
+
+    hits1 = hits3 = 0
+    for p_out, p_in, pos, cand in trials:
+        S = scaled[pos]
+        sims = cosine_similarity(S.loc[[p_out]], S.loc[cand])[0]
+        order = [cand[i] for i in np.argsort(-sims)]
+        rank = order.index(p_in) + 1
+        hits1 += rank == 1
+        hits3 += rank <= 3
+    n = max(1, len(trials))
+    return hits1 / n, hits3 / n
+
+
 def load_substitutions():
     teams_raw = json.load(open(RAW / "teams.json"))
     team_names = {t["wyId"]: fix_text(t["name"]) for t in teams_raw}
@@ -179,58 +257,42 @@ def load_substitutions():
 
 
 def substitution_eval(features):
+    """Rank the actual replacement among squad candidates, per algorithm.
+
+    If train_metric.py has produced a time split, ONLY the held-out test pairs
+    (last ~30% of the season) are scored — so the learned triplet metric is
+    never evaluated on substitutions it trained on, and every other method is
+    scored on the same pairs for a fair comparison.
+    """
     print("\n[2/3] substitution-pair retrieval …")
-    pairs = load_substitutions()
-    # keep one row per player (mid-season league movers appear twice)
-    feats = features.sort_values("minutes", ascending=False) \
-                    .drop_duplicates(subset="player_id").set_index("player_id")
-    cols = TABULAR + TOPOLOGY
+    split_path = PROCESSED / "substitution_split.json"
+    if split_path.exists():
+        split = json.loads(split_path.read_text())
+        pairs = [(s["out"], s["in"], s["team"]) for s in split["test"]]
+        note = f"held-out test pairs (matches after {split['cutoff_date'][:10]})"
+    else:
+        pairs = [(o, i, t) for (o, i, t) in load_substitutions()]
+        note = "ALL pairs — no train/test split found, run train_metric.py"
+    print(f"  scoring on {note}")
 
-    # scale within position pools once
-    scaled = {}
-    for pos in POSITIONS:
-        pool = feats[feats.position == pos]
-        X = StandardScaler().fit_transform(pool[cols].fillna(0))
-        scaled[pos] = pd.DataFrame(X, index=pool.index)
+    feats = dedupe_by_id(features)
+    configs = available_configs(feats)
 
-    hits1 = hits3 = total = 0
-    rand_expect1 = rand_expect3 = 0.0
-    skipped_cross_pos = 0
-    for (p_out, p_in, team), _cnt in pairs.items():
-        if p_out not in feats.index or p_in not in feats.index:
-            continue
-        out_row, in_row = feats.loc[p_out], feats.loc[p_in]
-        if out_row["position"] != in_row["position"]:
-            skipped_cross_pos += 1
-            continue
-        pos = out_row["position"]
-        # candidates: same squad, same position, not the leaving player
-        cand = feats[(feats.team_name == team) & (feats.position == pos)].index
-        cand = [c for c in cand if c != p_out]
-        if p_in not in cand or len(cand) < 2:
-            continue
-        S = scaled[pos]
-        sims = cosine_similarity(S.loc[[p_out]], S.loc[cand])[0]
-        order = [cand[i] for i in np.argsort(-sims)]
-        rank = order.index(p_in) + 1
-        hits1 += rank == 1
-        hits3 += rank <= 3
-        total += 1
-        rand_expect1 += 1 / len(cand)
-        rand_expect3 += min(1, 3 / len(cand))
+    trials, rand1, rand3 = build_sub_trials(feats, pairs)
 
     res = {
-        "n_pairs": total,
-        "skipped_cross_position": skipped_cross_pos,
-        "hit@1": round(hits1 / total, 3),
-        "hit@3": round(hits3 / total, 3),
-        "random@1": round(rand_expect1 / total, 3),
-        "random@3": round(rand_expect3 / total, 3),
+        "n_pairs": len(trials),
+        "note": note,
+        "random@1": round(rand1, 3),
+        "random@3": round(rand3, 3),
+        "configs": {},
     }
-    print(f"  {total} same-position substitution pairs "
-          f"(skipped {skipped_cross_pos} cross-position)")
-    print(f"  hit@1={res['hit@1']:.1%} (random {res['random@1']:.1%})   "
-          f"hit@3={res['hit@3']:.1%} (random {res['random@3']:.1%})")
+
+    for config, cols in configs.items():
+        hit1, hit3 = sub_hit_rates(feats, cols, trials)
+        res["configs"][config] = {"hit@1": round(hit1, 3), "hit@3": round(hit3, 3)}
+        print(f"  {config:32s} hit@1={hit1:.1%} hit@3={hit3:.1%}  "
+              f"(random {res['random@1']:.1%} / {res['random@3']:.1%})")
     return res
 
 
@@ -238,7 +300,7 @@ def substitution_eval(features):
 def role_coherence(features):
     print("\n[3/3] role coherence of top-5 neighbours …")
     out = {}
-    for config, cols in CONFIGS.items():
+    for config, cols in available_configs(features).items():
         agree, base, n = [], [], 0
         for pos in POSITIONS:
             pool = features[(features.position == pos) & features.eligible]
